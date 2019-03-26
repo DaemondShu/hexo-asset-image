@@ -22,3 +22,11 @@ MacGesture2-Publish.md
 Make sure `post_asset_folder: true` in your `_config.yml`.
 
 Just use `![logo](logo.jpg)` to insert `logo.jpg`.
+
+# config with lazyload
+```
+asset_image:
+  lazyload : true
+  loading_img : /images/loading2.svg
+  lazy_attr: data-original
+```
