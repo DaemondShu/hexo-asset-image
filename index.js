@@ -16,6 +16,8 @@ hexo.extend.filter.register('after_post_render', function(data){
     link = link.substring(beginPos, endPos);
 
     var toprocess = ['excerpt', 'more', 'content'];
+    var asset_image_config = config.asset_image;
+
     for(var i = 0; i < toprocess.length; i++){
       var key = toprocess[i];
  
@@ -27,29 +29,32 @@ hexo.extend.filter.register('after_post_render', function(data){
       });
 
       $('img').each(function(){
-		if ($(this).attr('src')){
-			// For windows style path, we replace '\' to '/'.
-			var src = $(this).attr('src').replace('\\', '/');
-			if(!/http[s]*.*|\/\/.*/.test(src) &&
-			   !/^\s*\//.test(src)) {
-			  // For "about" page, the first part of "src" can't be removed.
-			  // In addition, to support multi-level local directory.
-			  var linkArray = link.split('/').filter(function(elem){
-				return elem != '';
-			  });
-			  var srcArray = src.split('/').filter(function(elem){
-				return elem != '' && elem != '.';
-			  });
-			  if(srcArray.length > 1)
-				srcArray.shift();
-			  src = srcArray.join('/');
-			  $(this).attr('src', config.root + link + src);
-			  console.info&&console.info("update link as:-->"+config.root + link + src);
-			}
-		}else{
-			console.info&&console.info("no src attr, skipped...");
-			console.info&&console.info($(this));
-		}
+		// For windows style path, we replace '\' to '/'.
+        var src = $(this).attr('src').replace('\\', '/');
+        if(!/http[s]*.*|\/\/.*/.test(src)){
+		  // For "about" page, the first part of "src" can't be removed.
+		  // In addition, to support multi-level local directory.
+		  var linkArray = link.split('/').filter(function(elem){
+		    return elem != '';
+		  });
+		  var srcArray = src.split('/').filter(function(elem){
+		    return elem != '';
+		  });
+		  if(linkArray[linkArray.length - 1] == srcArray[0])
+		    srcArray.shift();
+          src = srcArray.join('/');
+          if (asset_image_config == undefined || asset_image_config.lazyload != true)
+          {
+            $(this).attr('src', '/' + link + src);
+          }
+          else
+          {
+            // $(this).attr('src', "/images/img_loading.gif");
+            $(this).attr('src', asset_image_config.loading_img);
+            $(this).attr(asset_image_config.lazy_attr, '/' + link + src);  
+          }
+          //lazy load
+        }
       });
       data[key] = $.html();
     }
